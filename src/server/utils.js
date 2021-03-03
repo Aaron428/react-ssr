@@ -1,16 +1,17 @@
 import React from 'react';
 import {renderToString} from 'react-dom/server';
-import {StaticRouter} from 'react-router-dom';
+import {StaticRouter, Route} from 'react-router-dom';
 import {Provider} from 'react-redux';
-import Routes from '../routes';
 
-import getStore from '../store';
-
-export const render = (req) => {
+export const render = (store, routes, path) => {
   const homeString = renderToString(
-    <Provider store={getStore()}>
-      <StaticRouter location={req.path} context={{}}>
-        {Routes}
+    <Provider store={store}>
+      <StaticRouter location={path} context={{}}>
+        <React.Fragment>
+          {routes.map((route) => (
+            <Route {...route} />
+          ))}
+        </React.Fragment>
       </StaticRouter>
     </Provider>
   );
@@ -23,6 +24,11 @@ export const render = (req) => {
       <body>
         <div id="root">${homeString}</div>
       </body>
+      <script>
+        window.context = {
+          state: ${JSON.stringify(store.getState())}
+        }
+      </script>
       <script src="/index.js"></script>
     </html>
   `;
